@@ -1,18 +1,17 @@
-import Header from './components/Header';
-import Hero from './components/Hero';
-import ToolsGrid from './components/ToolsGrid';
-import Footer from './components/Footer';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Tools from './pages/Tools';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
-    <div className="min-h-screen bg-white">
-      <Header />
-      <main>
-        <Hero />
-        <ToolsGrid />
-      </main>
-      <Footer />
-    </div>
+    <BrowserRouter>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/tools" element={<Tools />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

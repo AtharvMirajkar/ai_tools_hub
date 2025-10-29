@@ -3,7 +3,11 @@ import { Loader2, AlertCircle } from "lucide-react";
 import { supabase, AITool } from "../lib/supabase";
 import AIToolCard from "./AIToolCard";
 
-export default function ToolsGrid() {
+interface ToolsGridProps {
+  limit?: number;
+}
+
+export default function ToolsGrid({ limit }: ToolsGridProps) {
   const [tools, setTools] = useState<AITool[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,11 +21,17 @@ export default function ToolsGrid() {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from("ai_tools")
         .select("*")
         .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
+
+      if (limit) {
+        query = query.limit(limit);
+      }
+
+      const { data, error: fetchError } = await query;
 
       if (fetchError) throw fetchError;
 
