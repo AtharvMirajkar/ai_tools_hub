@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Search, Filter } from "lucide-react";
 import { supabase, AITool } from "../lib/supabase";
 import AIToolCard from "./AIToolCard";
 
@@ -11,10 +11,34 @@ export default function ToolsGrid({ limit }: ToolsGridProps) {
   const [tools, setTools] = useState<AITool[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchTools();
+    fetchCategories();
   }, []);
+
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      fetchTools();
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchTerm, selectedCategory, limit]);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase.from('ai_tools').select('category');
+      if (error) throw error;
+      if (data) {
+        const uniqueCategories = [...new Set(data.map(item => item.category).filter(Boolean))].sort();
+        setCategories(uniqueCategories);
+      }
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+    }
+  };
 
   const fetchTools = async () => {
     try {
@@ -31,6 +55,14 @@ export default function ToolsGrid({ limit }: ToolsGridProps) {
         query = query.limit(limit);
       }
 
+      if (searchTerm) {
+        query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+      }
+
+      if (selectedCategory) {
+        query = query.eq('category', selectedCategory);
+      }
+
       const { data, error: fetchError } = await query;
 
       if (fetchError) throw fetchError;
@@ -44,33 +76,64 @@ export default function ToolsGrid({ limit }: ToolsGridProps) {
     }
   };
 
-  if (loading) {
-    return (
-      <section
-        id="tools"
-        className="py-20 bg-gradient-to-b from-white to-gray-50"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-              <p className="text-gray-600 font-medium">Loading AI tools...</p>
+  return (
+    <section
+      id="tools"
+      className="py-20 bg-gradient-to-b from-white to-gray-50 pt-36 sm:pt-40"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12 animate-fade-in-up">
+          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+            {limit ? "Featured" : "All"}{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              AI Tools
+            </span>
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            {limit
+              ? "Handpicked collection of the most powerful AI platforms and tools available today"
+              : "Explore our comprehensive directory of AI tools to find the perfect one for your needs."}
+          </p>
+        </div>
+
+        {!limit && (
+          <div className="mb-12 flex flex-col md:flex-row gap-4 max-w-4xl mx-auto">
+            <div className="relative flex-grow">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search tools by name or description..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              />
+            </div>
+            <div className="relative">
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full md:w-auto pl-12 pr-8 py-3 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none"
+              >
+                <option value="">All Categories</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
             </div>
           </div>
-        </div>
-      </section>
-    );
-  }
+        )}
 
-  if (error) {
-    return (
-      <section
-        id="tools"
-        className="py-20 bg-gradient-to-b from-white to-gray-50"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center min-h-[400px]">
+        {loading ? (
+          <div className="flex items-center justify-center min-h-[300px]">
             <div className="text-center">
+              <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+              <p className="text-gray-600 font-medium">Loading tools...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center min-h-[300px]">
+            <div className="text-center max-w-md mx-auto">
               <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
               <p className="text-gray-900 font-semibold mb-2">
                 Oops! Something went wrong
@@ -84,35 +147,10 @@ export default function ToolsGrid({ limit }: ToolsGridProps) {
               </button>
             </div>
           </div>
-        </div>
-      </section>
-    );
-  }
-
-  return (
-    <section
-      id="tools"
-      className="py-20 bg-gradient-to-b from-white to-gray-50"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16 animate-fade-in-up">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-            Featured{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              AI Tools
-            </span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Handpicked collection of the most powerful AI platforms and tools
-            available today
-          </p>
-        </div>
-
-        {tools.length === 0 ? (
+        ) : tools.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-600 text-lg">
-              No AI tools found. Check back soon!
-            </p>
+            <p className="text-gray-600 text-lg font-medium">No AI tools found that match your criteria.</p>
+            <p className="text-gray-500 mt-2">Try adjusting your search or filter.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
