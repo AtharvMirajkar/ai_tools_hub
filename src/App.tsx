@@ -4,6 +4,7 @@ import Tools from './pages/Tools';
 import Admin from './pages/Admin';
 import AdminDashboard from './pages/AdminDashboard';
 import ScrollToTop from './components/ScrollToTop';
+import AdminLayout from './layouts/AdminLayout';
 
 function App() {
   return (
@@ -13,7 +14,11 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/tools" element={<Tools />} />
         <Route path="/admin" element={<Admin />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboard />} />
+        </Route>
+
       </Routes>
     </BrowserRouter>
   );
