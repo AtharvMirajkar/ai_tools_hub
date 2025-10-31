@@ -8,6 +8,9 @@ import AdminLayout from './layouts/AdminLayout';
 import ToolPage from './pages/ToolPage';
 import Header from './components/Header';
 import Favorites from './pages/Favorites';
+import Blog from './pages/Blog';
+import NewPost from './pages/NewPost';
+import PostPage from './pages/PostPage';
 
 function App() {
   return (
@@ -20,6 +23,9 @@ function App() {
         <Route path="/tool/:id" element={<ToolPage />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/favorites" element={<Favorites />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/new" element={<NewPost />} />
+        <Route path="/blog/:id" element={<PostPage />} />
         
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />

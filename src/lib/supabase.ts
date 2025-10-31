@@ -22,3 +22,15 @@ export interface AITool {
   created_at: string;
   updated_at: string;
 }
+
+export interface Post {
+    id: string;
+    title: string;
+    content: string;
+    user_id: string;
+    created_at: string;
+    user?: {
+      id: string;
+      full_name: string;
+    };
+  }
