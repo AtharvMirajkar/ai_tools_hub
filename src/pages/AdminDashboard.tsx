@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase, AITool } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, LogOut, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, LogOut, Loader2 } from 'lucide-react';
 import ToolFormModal from '../components/ToolFormModal';
 
 export default function AdminDashboard() {
@@ -13,16 +13,21 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: role } = await supabase.rpc('get_user_role');
+        if (role !== 'admin') {
+          navigate('/tools');
+        }
+      } else {
+        navigate('/auth');
+      }
+    };
+
     checkUser();
     fetchTools();
-  }, []);
-
-  const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate('/admin');
-    }
-  };
+  }, [navigate]);
 
   const fetchTools = async () => {
     try {
@@ -40,7 +45,7 @@ export default function AdminDashboard() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate('/admin');
+    navigate('/auth');
   };
 
   const openModal = (tool: AITool | null = null) => {

@@ -1,8 +1,8 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
-export default function Admin() {
+export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -11,43 +11,56 @@ export default function Admin() {
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: role } = await supabase.rpc('get_user_role');
+        if (role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/tools');
+        }
+      }
+    };
+
+    checkUser();
+  }, [navigate]);
+
+  const handleAuthAction = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setMessage(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      let authError;
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        authError = error;
+        if (!error) setMessage('Check your email for the confirmation link!');
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        authError = error;
+      }
 
-      if (error) throw error;
+      if (authError) throw authError;
 
-      navigate('/admin/dashboard');
-    } catch (err: any) {
-      setError(err.error_description || err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (!isSignUp) {
+        const { data: role } = await supabase.rpc('get_user_role');
+        if (role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/tools');
+        }
+      }
 
-  const handleSignUp = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setMessage(null);
-
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      setMessage('Check your email for the confirmation link!');
     } catch (err: any) {
       setError(err.error_description || err.message);
     } finally {
@@ -59,9 +72,9 @@ export default function Admin() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-20">
       <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg">
         <h2 className="text-3xl font-bold text-center text-gray-900 mb-6">
-          {isSignUp ? 'Create Admin Account' : 'Admin Login'}
+          {isSignUp ? 'Create an Account' : 'Log In'}
         </h2>
-        <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="space-y-6">
+        <form onSubmit={handleAuthAction} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email address

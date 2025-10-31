@@ -1,32 +1,95 @@
 import { Link } from 'react-router-dom';
-import { ExternalLink, CheckCircle2, ImageIcon, ArrowRight } from 'lucide-react';
-import { AITool } from '../lib/supabase';
+import { supabase, AITool } from '../lib/supabase';
+import { Heart, CheckCircle2, ImageIcon, ArrowRight } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface AIToolCardProps {
   tool: AITool;
   index: number;
+  userId?: string;
+  isInitiallyFavorited?: boolean;
+  onFavoriteToggle?: (toolId: string, isFavorited: boolean) => void;
 }
 
-export default function AIToolCard({ tool, index }: AIToolCardProps) {
+export default function AIToolCard({
+  tool,
+  index,
+  userId,
+  isInitiallyFavorited = false,
+  onFavoriteToggle,
+}: AIToolCardProps) {
+  const [isFavorited, setIsFavorited] = useState(isInitiallyFavorited);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    setIsFavorited(isInitiallyFavorited);
+  }, [isInitiallyFavorited]);
+
+  const toggleFavorite = useCallback(async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!userId || isProcessing) return;
+
+    setIsProcessing(true);
+    const currentlyFavorited = isFavorited;
+    
+    // Optimistically update the UI
+    setIsFavorited(!currentlyFavorited);
+
+    try {
+      if (currentlyFavorited) {
+        const { error } = await supabase
+          .from('user_favorites')
+          .delete()
+          .match({ user_id: userId, tool_id: tool.id });
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('user_favorites')
+          .insert({ user_id: userId, tool_id: tool.id });
+
+        if (error) throw error;
+      }
+      onFavoriteToggle?.(tool.id, !currentlyFavorited);
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      // Revert UI change on error
+      setIsFavorited(currentlyFavorited);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [isFavorited, isProcessing, userId, tool.id, onFavoriteToggle]);
+
   return (
-    <Link
-      to={`/tool/${tool.id}`}
+    <div
       className="group relative flex flex-col h-full bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-transparent hover:border-blue-500 animate-fade-in-up"
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      {/* Featured Badge */}
-      {tool.is_featured && (
-        <div className="absolute top-3 right-3 z-10">
-          <span className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+      <div className="absolute top-3 right-3 z-10 flex gap-2">
+        {userId && (
+          <button
+            onClick={toggleFavorite}
+            disabled={isProcessing}
+            className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ${
+              isFavorited
+                ? 'bg-red-500/10 text-red-500'
+                : 'bg-gray-500/10 text-gray-500'
+            } hover:bg-red-500/20 hover:text-red-600 disabled:opacity-50`}
+            aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
+          </button>
+        )}
+        {tool.is_featured && (
+          <span className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md flex items-center">
             Featured
           </span>
-        </div>
-      )}
-
-      {/* Card Body */}
-      <div className="flex flex-col flex-grow p-6">
-        
-        {/* Logo and Title */}
+        )}
+      </div>
+      
+      <Link to={`/tool/${tool.id}`} className="flex flex-col flex-grow p-6 pt-16">
         <div className="flex items-start mb-4">
           <div className="flex-shrink-0 w-16 h-16 mr-5">
             {tool.logo_url ? (
@@ -47,12 +110,10 @@ export default function AIToolCard({ tool, index }: AIToolCardProps) {
           </div>
         </div>
 
-        {/* Description */}
         <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 flex-grow mb-5">
           {tool.description}
         </p>
 
-        {/* Features */}
         {tool.features && tool.features.length > 0 && (
           <div className="space-y-3">
             {tool.features.slice(0, 3).map((feature, idx) => (
@@ -63,17 +124,16 @@ export default function AIToolCard({ tool, index }: AIToolCardProps) {
             ))}
           </div>
         )}
-      </div>
+      </Link>
 
-      {/* Footer */}
       <div className="bg-gray-50/70 p-4 mt-auto border-t border-gray-100">
-        <div className="flex items-center justify-between">
+        <Link to={`/tool/${tool.id}`} className="flex items-center justify-between">
           <span className="text-sm font-semibold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             View Details
           </span>
           <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors duration-300" />
-        </div>
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }
