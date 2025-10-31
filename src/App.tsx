@@ -5,6 +5,7 @@ import Admin from './pages/Admin';
 import AdminDashboard from './pages/AdminDashboard';
 import ScrollToTop from './components/ScrollToTop';
 import AdminLayout from './layouts/AdminLayout';
+import ToolPage from './pages/ToolPage';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/tools" element={<Tools />} />
+        <Route path="/tool/:id" element={<ToolPage />} />
         <Route path="/admin" element={<Admin />} />
         
         <Route path="/admin" element={<AdminLayout />}>

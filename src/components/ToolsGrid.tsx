@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, AlertCircle, Search, Filter } from "lucide-react";
+import { Loader2, AlertCircle, Search, Filter, ArrowDownUp } from "lucide-react";
 import { supabase, AITool } from "../lib/supabase";
 import AIToolCard from "./AIToolCard";
 
@@ -13,6 +13,7 @@ export default function ToolsGrid({ limit }: ToolsGridProps) {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [sortBy, setSortBy] = useState('featured'); // default sort
   const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function ToolsGrid({ limit }: ToolsGridProps) {
     }, 300);
 
     return () => clearTimeout(debounceTimer);
-  }, [searchTerm, selectedCategory, limit]);
+  }, [searchTerm, selectedCategory, sortBy, limit]);
 
   const fetchCategories = async () => {
     try {
@@ -45,11 +46,23 @@ export default function ToolsGrid({ limit }: ToolsGridProps) {
       setLoading(true);
       setError(null);
 
-      let query = supabase
-        .from("ai_tools")
-        .select("*")
-        .order("sort_order", { ascending: true })
-        .order("created_at", { ascending: false });
+      let query = supabase.from("ai_tools").select("*");
+
+      // Sorting logic
+      switch (sortBy) {
+        case 'featured':
+          query = query.order("sort_order", { ascending: true }).order("created_at", { ascending: false });
+          break;
+        case 'newest':
+          query = query.order("created_at", { ascending: false });
+          break;
+        case 'name-asc':
+          query = query.order("name", { ascending: true });
+          break;
+        case 'name-desc':
+          query = query.order("name", { ascending: false });
+          break;
+      }
 
       if (limit) {
         query = query.limit(limit);
@@ -83,43 +96,58 @@ export default function ToolsGrid({ limit }: ToolsGridProps) {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 animate-fade-in-up">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-            {limit ? "Featured" : "All"}{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              AI Tools
-            </span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            {limit
-              ? "Handpicked collection of the most powerful AI platforms and tools available today"
-              : "Explore our comprehensive directory of AI tools to find the perfect one for your needs."}
-          </p>
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
+                {limit ? "Featured" : "All"}{" "}
+                <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                AI Tools
+                </span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                {limit
+                ? "Handpicked collection of the most powerful AI platforms and tools available today"
+                : "Explore our comprehensive directory of AI tools to find the perfect one for your needs."}
+            </p>
         </div>
 
         {!limit && (
-          <div className="mb-12 flex flex-col md:flex-row gap-4 max-w-4xl mx-auto">
-            <div className="relative flex-grow">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search tools by name or description..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-              />
+          <div className="mb-12 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            <div className="md:col-span-3">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search tools by name or description..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  />
+                </div>
             </div>
-            <div className="relative">
+            <div className="relative md:col-span-2">
               <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full md:w-auto pl-12 pr-8 py-3 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none"
+                className="w-full pl-12 pr-8 py-3 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none"
               >
                 <option value="">All Categories</option>
                 {categories.map(category => (
                   <option key={category} value={category}>{category}</option>
                 ))}
               </select>
+            </div>
+            <div className="relative">
+                <ArrowDownUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full pl-12 pr-8 py-3 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none"
+                >
+                    <option value="featured">Featured</option>
+                    <option value="newest">Newest</option>
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                </select>
             </div>
           </div>
         )}

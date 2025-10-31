@@ -1,4 +1,5 @@
-import { ExternalLink, CheckCircle2, ImageIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ExternalLink, CheckCircle2, ImageIcon, ArrowRight } from 'lucide-react';
 import { AITool } from '../lib/supabase';
 
 interface AIToolCardProps {
@@ -8,10 +9,8 @@ interface AIToolCardProps {
 
 export default function AIToolCard({ tool, index }: AIToolCardProps) {
   return (
-    <a
-      href={tool.url}
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      to={`/tool/${tool.id}`}
       className="group relative flex flex-col h-full bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-transparent hover:border-blue-500 animate-fade-in-up"
       style={{ animationDelay: `${index * 100}ms` }}
     >
@@ -70,11 +69,11 @@ export default function AIToolCard({ tool, index }: AIToolCardProps) {
       <div className="bg-gray-50/70 p-4 mt-auto border-t border-gray-100">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            Explore Tool
+            View Details
           </span>
-          <ExternalLink className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors duration-300" />
+          <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors duration-300" />
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
