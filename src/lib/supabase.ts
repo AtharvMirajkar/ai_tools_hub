@@ -34,3 +34,15 @@ export interface Post {
       full_name: string;
     };
   }
+
+export interface Review {
+  id: string;
+  tool_id: string;
+  user_id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  user: {
+    full_name: string;
+  };
+}
