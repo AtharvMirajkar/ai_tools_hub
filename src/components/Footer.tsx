@@ -1,71 +1,54 @@
-import { Heart, Github, Twitter, Linkedin } from 'lucide-react';
+
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+    <footer className="bg-gray-800 text-white py-8">
+      <div className="container mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="text-white font-bold text-lg mb-4">AI Tools Hub</h3>
-            <p className="text-gray-400 leading-relaxed">
-              Your gateway to discovering and exploring the most innovative AI tools and platforms.
+            <h3 className="text-lg font-bold mb-4">AI Tool Finder</h3>
+            <p className="text-gray-400">
+              Discover the best AI tools, read reviews, and stay up-to-date with the latest trends in artificial intelligence.
             </p>
           </div>
-
           <div>
-            <h4 className="text-white font-semibold mb-4">Quick Links</h4>
+            <h3 className="text-lg font-bold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#tools" className="hover:text-blue-400 transition-colors duration-200">
-                  Browse Tools
-                </a>
+                <Link to="/" className="text-gray-400 hover:text-white transition-colors">
+                  Home
+                </Link>
               </li>
               <li>
-                <a href="#about" className="hover:text-blue-400 transition-colors duration-200">
+                <Link to="/tools" className="text-gray-400 hover:text-white transition-colors">
+                  Tools
+                </Link>
+              </li>
+              <li>
+                <Link to="/blog" className="text-gray-400 hover:text-white transition-colors">
+                  Blog
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="text-gray-400 hover:text-white transition-colors">
                   About Us
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
-
           <div>
-            <h4 className="text-white font-semibold mb-4">Connect</h4>
-            <div className="flex gap-4">
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-gray-800 p-3 rounded-lg hover:bg-blue-600 transition-colors duration-200"
-              >
-                <Github className="w-5 h-5" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-gray-800 p-3 rounded-lg hover:bg-blue-600 transition-colors duration-200"
-              >
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-gray-800 p-3 rounded-lg hover:bg-blue-600 transition-colors duration-200"
-              >
-                <Linkedin className="w-5 h-5" />
-              </a>
-            </div>
+            <h3 className="text-lg font-bold mb-4">Contact Us</h3>
+            <p className="text-gray-400">
+              Have questions or suggestions? We'd love to hear from you.
+            </p>
+            <a href="mailto:contact@aitoolfinder.com" className="text-blue-400 hover:underline mt-2 inline-block">
+              contact@aitoolfinder.com
+            </a>
           </div>
         </div>
-
-        <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-gray-400 text-sm text-center sm:text-left">
-            © {new Date().getFullYear()} AI Tools Hub. All rights reserved.
-          </p>
-          <p className="flex items-center gap-2 text-sm text-gray-400">
-            Made with <Heart className="w-4 h-4 text-red-500 fill-red-500" /> for AI enthusiasts
-          </p>
+        <div className="border-t border-gray-700 mt-8 pt-6 text-center text-gray-500">
+          &copy; {new Date().getFullYear()} AI Tool Finder. All rights reserved.
         </div>
       </div>
     </footer>

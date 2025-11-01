@@ -42,6 +42,9 @@ export default function Header() {
           <Link to="/blog" className="text-gray-600 hover:text-blue-600 transition-colors">
             Blog
           </Link>
+          <Link to="/about" className="text-gray-600 hover:text-blue-600 transition-colors">
+            About Us
+          </Link>
           {user ? (
             <>
               <Link to="/favorites" className="text-gray-600 hover:text-blue-600 transition-colors">
