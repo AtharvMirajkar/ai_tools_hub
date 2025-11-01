@@ -122,16 +122,11 @@ export default function ToolsGrid({ limit }: ToolsGridProps) {
   };
 
   return (
-    <section id="tools" className="py-20 bg-gradient-to-b from-white to-gray-50 pt-36 sm:pt-40">
+    <section id="tools" className="pb-20 bg-gradient-to-b from-white to-gray-50 pb-36 sm:pb-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12 animate-fade-in-up">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-            {limit ? 'Featured' : 'All'}{' '}
-            <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              AI Tools
-            </span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+        <div className="text-center mb-8 animate-fade-in-up">
+  
+          <p className="text-lg leading-8 text-gray-600 max-w-3xl mx-auto mt-2">
             {limit
               ? 'Handpicked collection of the most powerful AI platforms and tools available today'
               : 'Explore our comprehensive directory of AI tools to find the perfect one for your needs.'}

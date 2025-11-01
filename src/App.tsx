@@ -19,11 +19,13 @@ function AppContent() {
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isAuthRoute = location.pathname === '/auth';
 
+  const showHeader = !isAdminRoute && !isAuthRoute;
+
   return (
     <>
       <ScrollToTop />
-      {!isAdminRoute && <Header />}
-      <main className={!isAdminRoute ? "pt-20" : ""}>
+      {showHeader && <Header />}
+      <main className={showHeader ? "pt-10 sm:pt-0" : ""}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/tools" element={<Tools />} />
