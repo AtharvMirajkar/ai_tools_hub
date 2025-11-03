@@ -49,7 +49,7 @@ export default function ToolPage() {
         if (toolError) throw toolError;
         setTool(toolData);
 
-        const { data: reviewsData, error: reviewsError } = await supabase.from('reviews').select('*, user:users_public_data!user_id(id, full_name, avatar_url)').eq('tool_id', id).order('created_at', { ascending: false });
+        const { data: reviewsData, error: reviewsError } = await supabase.from('reviews').select('*, user:users_public_data!user_id(id, full_name)').eq('tool_id', id).order('created_at', { ascending: false });
         if (reviewsError) throw reviewsError;
         setReviews(reviewsData as any);
 
@@ -74,7 +74,7 @@ export default function ToolPage() {
     if (!user || !tool || userReview.rating === 0) return;
     setSubmitting(true);
     try {
-        const { data, error } = await supabase.from('reviews').upsert({ tool_id: tool.id, user_id: user.id, rating: userReview.rating, comment: userReview.comment }, { onConflict: 'tool_id,user_id' }).select('*, user:users_public_data!user_id(id, full_name, avatar_url)').single();
+        const { data, error } = await supabase.from('reviews').upsert({ tool_id: tool.id, user_id: user.id, rating: userReview.rating, comment: userReview.comment }, { onConflict: 'tool_id,user_id' }).select('*, user:users_public_data!user_id(id, full_name)').single();
         if (error) throw error;
 
         const existingReviewIndex = reviews.findIndex(r => r.user_id === user.id);
